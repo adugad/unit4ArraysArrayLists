@@ -38,7 +38,7 @@ public class Radar
         // initialize instance variables
         currentScan = new boolean[rows][cols]; // elements will be set to false
         preScan = new boolean[rows][cols];
-        accumulatorV = new int[rows][cols];
+        accumulatorV = new int[11][11];
         // randomly set the location of the monster (can be explicity set through the
         //  setMonsterLocation method
         monsterLocationRow = (int)((Math.random() * rows) / 10.0);
@@ -53,6 +53,8 @@ public class Radar
     
     /**
      * Performs a scan of the radar. Noise is injected into the grid and the accumulator is updated.
+     * 
+     * @pre  dx and dy are integer values between 5 and -5
      * 
      */
     public void scan()
@@ -78,21 +80,26 @@ public class Radar
         
         if(numScans > 0)
         {
-            for(int row = 0; row < 6+ (numScans * 5); row++)
+            for(int row = 0; row < currentScan.length; row++)
             {
-                for(int col = 0; col < 6 + (numScans*5); col++)
+                for(int col = 0; col < currentScan[0].length; col++)
                 {
                     if(preScan[row][col] == true)
                     {
-                        for(int row2 = 0; row2 < 6+ (numScans * 5); row2++)
+                        for(int row2 = 0; row2 < currentScan.length; row2++)
                         {
-                            for(int col2 = 0; col2 < 6 + (numScans*5); col2++)
+                            for(int col2 = 0; col2 < currentScan[0].length; col2++)
                             {
                                 if(currentScan[row2][col2] == true)
                                 {
-                                    xVelocity = col2 +50 - col;
-                                    yVelocity = row2 +50 - row;
-                                    accumulatorV[xVelocity][yVelocity]++;
+                                    xVelocity = col2 - col;
+                                    yVelocity = row2 - row;
+                                    if((xVelocity >= -5) && (xVelocity <=5) && (yVelocity >= -5) && (yVelocity <=5))
+                                    {
+                                        xVelocity += 5;
+                                        yVelocity += 5;
+                                        accumulatorV[yVelocity][xVelocity]++;
+                                    }
                                 }
                             }
                         }
@@ -105,8 +112,8 @@ public class Radar
                     {
                         if ( accumulatorV[row][col] == numScans)
                         {
-                            dx = col - 50;
-                            dy = row - 50;
+                            dx = col - 5;
+                            dy = row - 5;
                         }
                     }
                 }
@@ -124,6 +131,14 @@ public class Radar
         {
             monsterLocationCol += dx;
             monsterLocationRow += dy;
+        }
+        if(monsterLocationCol >= 100)
+        {
+            monsterLocationCol -= 100;
+        }
+        if(monsterLocationRow >= 100)
+        {
+            monsterLocationRow -= 100;
         }
         // keep track of the total number of scans
         numScans++;
